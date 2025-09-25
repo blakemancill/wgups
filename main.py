@@ -15,10 +15,6 @@ with open("data/addresses.csv") as csvfile1:
     csv_address = csv.reader(csvfile1)
     csv_address = list(csv_address)
 
-with open("data/packages.csv") as csvfile2:
-    csv_packages = csv.reader(csvfile2)
-    csv_packages = list(csv_packages)
-
 package_hash_table = ChainingHashTable()
 
 # Creates package objects from the csv data, and loads package objects into hash table
@@ -114,6 +110,8 @@ def nearest_neighbor(truck):
 
 nearest_neighbor(truck1)
 nearest_neighbor(truck2)
+
+# Only two drivers. First back gets next truck
 truck3.depart_time = min(truck1.time, truck2.time)
 nearest_neighbor(truck3)
 
