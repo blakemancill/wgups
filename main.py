@@ -37,7 +37,7 @@ def load_package_data(filename, package_hash_table):
 
             package = Package(
                 package_id, package_address, package_city, package_state,
-                package_zip_code, package_deadline_time, package_weight, package_status
+                package_zip_code, package_deadline_time, package_weight, package_status, None, None
             )
 
             package_hash_table.insert(package_id, package)
@@ -90,7 +90,7 @@ def nearest_neighbor(truck):
                 next_address = distance_between(extract_address(truck.address), extract_address(package.address))
                 next_package = package
         # Adds next closest package to the truck package list
-        truck.packages.append(next_package.ID)
+        truck.packages.append(next_package.package_id)
         # Removes the same package from the not_delivered list
         not_delivered.remove(next_package)
         # Takes the mileage driven to this packaged into the truck.mileage attribute
