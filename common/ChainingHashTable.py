@@ -22,3 +22,11 @@ class ChainingHashTable:
         return True
 
     # Looks up an item in hash table
+    def lookup(self, key):
+        bucket = hash(key) % len(self.list)
+        bucket_list = self.list[bucket]
+        for pair in bucket_list:
+            if key == pair[0]:
+                return pair[1]
+        return None
+
