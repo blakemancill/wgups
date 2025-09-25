@@ -30,3 +30,9 @@ class ChainingHashTable:
                 return pair[1]
         return None
 
+    # Removes item from hash table
+    def hash_remove(self, key):
+        slot = hash(key) % len(self.list)
+        destination = self.list[slot]
+        if key in destination:
+            destination.remove(key)
