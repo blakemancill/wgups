@@ -17,7 +17,7 @@ class Package:
                                                        self.status)
 
     def update_status(self, convert_timedelta):
-        if self.delivery_time < convert_timedelta:
+        if self.delivery_time <= convert_timedelta:
             self.status = "Delivered"
         elif self.delivery_time > convert_timedelta:
             self.status = "En route"
