@@ -55,11 +55,17 @@ def extract_address(address):
         if address in row[2]:
             return int(row[0])
 
+# Update package 9's address at 10:20am
+def update_package_9_address():
+    package_9 = package_hash_table.lookup(9)
+    package_9.address = "410 S State St"
+    package_9.zipcode = "84111"
+
 # Create truck objects
 truck1 = Truck(16, 18, None, [1, 13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40], 0.0, "4001 South 700 East",
                      datetime.timedelta(hours=8))
 
-truck2 = Truck(16, 18, None, [3, 6, 12, 17, 18, 19, 21, 22, 23, 24, 26, 27, 35, 36, 38, 39], 0.0,
+truck2 = Truck(16, 18, None, [3, 12, 17, 18, 19, 21, 22, 23, 24, 26, 27, 35, 36, 38, 39], 0.0,
                      "4001 South 700 East", datetime.timedelta(hours=10, minutes=20))
 
 truck3 = Truck(16, 18, None, [2, 4, 5, 6, 7, 8, 9, 10, 11, 25, 28, 32, 33], 0.0, "4001 South 700 East",
@@ -79,6 +85,10 @@ def nearest_neighbor(truck):
 
     # Clear the package list of a given truck so the packages can be placed in optimal order
     truck.packages.clear()
+
+    # Updates address for package 9 if truck leaves at or after 10:20
+    if truck.depart_time >= datetime.timedelta(hours=10, minutes=20):
+        update_package_9_address()
 
     # Cycle through the list of not_delivered until none remain in the list
     # Adds the nearest package into the truck.packages list one by one
