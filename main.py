@@ -20,9 +20,9 @@ package_hash_table = ChainingHashTable()
 
 def display_packages_by_truck(convert_timedelta):
     trucks = [
-        ("Truck 1", [1, 13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40]),
+        ("Truck 1", [1, 9, 13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40]),
         ("Truck 2", [3, 12, 17, 18, 19, 21, 22, 23, 24, 26, 27, 35, 36, 38, 39]),
-        ("Truck 3", [2, 4, 5, 6, 7, 8, 9, 10, 11, 25, 28, 32, 33])
+        ("Truck 3", [2, 4, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33])
     ]
 
     for truck_name, package_ids in trucks:
@@ -85,63 +85,61 @@ def update_package_9_address():
     package_9.zipcode = "84111"
 
 # Create truck objects
-truck1 = Truck(16, 18, None, [1, 13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40], 0.0, "4001 South 700 East",
+truck1 = Truck(16, 18, None, [1, 9, 13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40], 0.0, "4001 South 700 East",
                      datetime.timedelta(hours=8))
 
 truck2 = Truck(16, 18, None, [3, 12, 17, 18, 19, 21, 22, 23, 24, 26, 27, 35, 36, 38, 39], 0.0,
                      "4001 South 700 East", datetime.timedelta(hours=8))
 
-truck3 = Truck(16, 18, None, [2, 4, 5, 6, 7, 8, 9, 10, 11, 25, 28, 32, 33], 0.0, "4001 South 700 East",
-                     datetime.timedelta(hours=8))
+truck3 = Truck(16, 18, None, [2, 4, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33], 0.0, "4001 South 700 East",
+                     datetime.timedelta(hours=9, minutes=5))
 
 # Load packages into hash table
 load_package_data("data/packages.csv", package_hash_table)
 
 def nearest_neighbor(truck):
-    not_delivered = []
-    truck.time = truck.depart_time
-    for package_id in truck.packages:
-        package = package_hash_table.lookup(package_id)
-        not_delivered.append(package)
-
+    not_delivered = [package_hash_table.lookup(pid) for pid in truck.packages]
     truck.packages.clear()
+    truck.time = truck.depart_time
 
-    while len(not_delivered) > 0:
-        next_package = None
-        next_address_dist = float('inf')
-
-        # Prioritize by earliest deadline, then by shortest distance
-        # Sort not_delivered by deadline (earliest first), then by distance from current truck location
+    while not_delivered:
         current_address_index = extract_address(truck.address)
-        not_delivered.sort(key=lambda p: (
-            p.deadline_time,  # Primary: earliest deadline first
-            distance_between(current_address_index, extract_address(p.address))  # Secondary: shortest distance
-        ))
 
-        # Now pick the first eligible package (closest among earliest deadlines)
-        for package in not_delivered:
-            dist = distance_between(current_address_index, extract_address(package.address))
-            next_package = package
-            next_address_dist = dist
-            break
+        # Filter packages that are ready to deliver (truck waits if none)
+        ready_packages = [p for p in not_delivered if truck.time >= getattr(p, "available_time", datetime.timedelta(hours=8))]
+        if not ready_packages:
+            # Wait until the earliest package becomes available
+            next_available_time = min(getattr(p, "available_time", datetime.timedelta(hours=8)) for p in not_delivered)
+            truck.time = next_available_time
+            ready_packages = [p for p in not_delivered if truck.time >= getattr(p, "available_time", datetime.timedelta(hours=8))]
 
-        # Update truck and package
-        truck.packages.append(next_package.package_id)
-        not_delivered.remove(next_package)
+        # Check for priority packages
+        priority_packages = [p for p in ready_packages if getattr(p, "priority", False)]
+        if priority_packages:
+            next_package = priority_packages[0]  # Take first priority package
+        else:
+            # Sort by earliest deadline, then by shortest distance
+            ready_packages.sort(key=lambda p: (p.deadline_time, distance_between(current_address_index, extract_address(p.address))))
+            next_package = ready_packages[0]
+
+        # Deliver the package
+        next_address_dist = distance_between(current_address_index, extract_address(next_package.address))
         truck.mileage += next_address_dist
-        truck.address = next_package.address
-        truck.time += datetime.timedelta(hours=next_address_dist / 18)
+        truck.time += datetime.timedelta(hours=next_address_dist / 18)  # Truck speed 18 mph
         next_package.delivery_time = truck.time
         next_package.departure_time = truck.depart_time
+        truck.address = next_package.address
+        truck.packages.append(next_package.package_id)
+        not_delivered.remove(next_package)
+
 
 nearest_neighbor(truck1)
 nearest_neighbor(truck2)
 
-# Only two drivers. First back gets next truck
+# Two drivers: Truck 3 departs when first driver returns, but not before 9:05am due to delayed packages
 truck3.depart_time = min(truck1.time, truck2.time)
-
-if truck3.depart_time < datetime.timedelta(hours=10, minutes=20):
-    truck3.depart_time = datetime.timedelta(hours=10, minutes=20)
+if truck3.depart_time < datetime.timedelta(hours=9, minutes=5):
+    truck3.depart_time = datetime.timedelta(hours=9, minutes=5)
 
 nearest_neighbor(truck3)
 
