@@ -36,3 +36,10 @@ def load_package_data(filename, package_hash_table):
             )
 
             package_hash_table.insert(package_id, package)
+
+# Calculates distance between two addresses
+def distance_between(x_value, y_value):
+    distance = csv_distance[x_value][y_value]
+    if distance == '':
+        distance = csv_distance[y_value][x_value]
+    return float(distance)
