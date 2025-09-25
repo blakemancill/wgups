@@ -12,9 +12,14 @@ class Package:
         self.delivery_time = delivery_time
 
     def __str__(self):
-        return "%s, %s, %s, %s, %s, %s, %s, %s, %s" % (self.package_id, self.address, self.city, self.state, self.zipcode,
-                                                       self.deadline_time, self.weight, self.delivery_time,
-                                                       self.status)
+        output = []
+        output.append(f"Package ID: {self.package_id}")
+        output.append(f"Address: {self.address}, {self.city}, {self.zipcode}")
+        output.append(f"Deadline: {self.deadline_time}, Weight: {self.weight}")
+        output.append(f"Status: {self.status} (Departed: {self.departure_time})")
+        if self.delivery_time:
+            output.append(f"Delivery Time: {self.delivery_time}")
+        return "\n".join(output)
 
     def update_status(self, convert_timedelta):
         if self.delivery_time <= convert_timedelta:

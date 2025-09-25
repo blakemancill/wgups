@@ -160,7 +160,7 @@ if __name__ == "__main__":
                     for packageID in range(1, 41):
                         package = package_hash_table.lookup(packageID)
                         package.update_status(convert_timedelta)
-                        print(str(package))
+                        print(str(package) + "\n")
                 except ValueError:
                     print("Entry invalid. Closing program.")
                     exit()
