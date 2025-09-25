@@ -106,3 +106,51 @@ nearest_neighbor(truck1)
 nearest_neighbor(truck2)
 truck3.depart_time = min(truck1.time, truck2.time)
 nearest_neighbor(truck3)
+
+if __name__ == "__main__":
+    # User Interface
+    # Upon running the program, the below message will appear.
+    print("Western Governors University Parcel Service (WGUPS)")
+    print("The mileage for the route is:")
+    print(truck1.mileage + truck2.mileage + truck3.mileage)  # Print total mileage for all trucks
+    # The user will be asked to start the process by entering the word "time"
+    text = input("To start please type the word 'time' (All else will cause the program to quit).")
+    # If the user doesn't type "leave" the program will ask for a specific time in regard to checking packages
+    if text == "time":
+        try:
+            # The user will be asked to enter a specific time
+            user_time = input("Please enter a time to check status of package(s). Use the following format, HH:MM:SS")
+            (h, m, s) = user_time.split(":")
+            convert_timedelta = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
+            # The user will be asked if they want to see the status of all packages or only one
+            second_input = input("To view the status of an individual package please type 'solo'. For a rundown of all"
+                                 " packages please type 'all'.")
+            # If the user enters "solo" the program will ask for one package ID
+            if second_input == "solo":
+                try:
+                    # The user will be asked to input a package ID. Invalid entry will cause the program to quit
+                    solo_input = input("Enter the numeric package ID")
+                    package = package_hash_table.lookup(int(solo_input))
+                    package.update_status(convert_timedelta)
+                    print(str(package))
+                except ValueError:
+                    print("Entry invalid. Closing program.")
+                    exit()
+            # If the user types "all" the program will display all package information at once
+            elif second_input == "all":
+                try:
+                    for packageID in range(1, 41):
+                        package = package_hash_table.lookup(packageID)
+                        package.update_status(convert_timedelta)
+                        print(str(package))
+                except ValueError:
+                    print("Entry invalid. Closing program.")
+                    exit()
+            else:
+                exit()
+        except ValueError:
+            print("Entry invalid. Closing program.")
+            exit()
+    elif input != "time":
+        print("Entry invalid. Closing program.")
+        exit()
