@@ -82,9 +82,10 @@ def nearest_neighbor(truck):
     # Clear the package list of a given truck so the packages can be placed in optimal order
     truck.packages.clear()
 
-    # Updates address for package 9 if truck leaves at or after 10:20
-    if truck.depart_time >= datetime.timedelta(hours=10, minutes=20):
-        update_package_9_address()
+    # Updates address for package 9 if truck leaves at or after 10:20. Removed due to bug where package address
+    # would update before 10:20
+#    if truck.depart_time >= datetime.timedelta(hours=10, minutes=20):
+#        update_package_9_address()
 
     # Cycle through the list of not_delivered until none remain in the list
     # Adds the nearest package into the truck.packages list one by one
@@ -113,6 +114,10 @@ nearest_neighbor(truck2)
 
 # Only two drivers. First back gets next truck
 truck3.depart_time = min(truck1.time, truck2.time)
+
+if truck3.depart_time < datetime.timedelta(hours=10, minutes=20):
+    truck3.depart_time = datetime.timedelta(hours=10, minutes=20)
+
 nearest_neighbor(truck3)
 
 if __name__ == "__main__":
@@ -130,6 +135,11 @@ if __name__ == "__main__":
             user_time = input("Please enter a time to check status of package(s). Use the following format, HH:MM:SS")
             (h, m, s) = user_time.split(":")
             convert_timedelta = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
+
+            # Updates package 9 delivery address
+            if convert_timedelta >= datetime.timedelta(hours=10, minutes=20):
+                update_package_9_address()
+
             # The user will be asked if they want to see the status of all packages or only one
             second_input = input("To view the status of an individual package please type 'solo'. For a rundown of all"
                                  " packages please type 'all'.")
