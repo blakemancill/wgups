@@ -113,10 +113,6 @@ def nearest_neighbor(truck):
             truck.time = next_available_time
             ready_packages = [p for p in not_delivered if truck.time >= getattr(p, "available_time", datetime.timedelta(hours=8))]
 
-        # Check for priority packages
-        priority_packages = [p for p in ready_packages if getattr(p, "priority", False)]
-        if priority_packages:
-            next_package = priority_packages[0]  # Take first priority package
         else:
             # Sort by earliest deadline, then by shortest distance
             ready_packages.sort(key=lambda p: (p.deadline_time, distance_between(current_address_index, extract_address(p.address))))
