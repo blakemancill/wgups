@@ -53,6 +53,18 @@ def load_package_data(filename, package_hash_table):
 
             package_hash_table.insert(package_id, package)
 
+# Checks if packages were delivered before their deadline
+def check_all_deadlines():
+    all_met = True
+    for package_id in range(1, 41):
+        package = package_hash_table.lookup(package_id)
+        if package.delivery_time > package.deadline_time:
+            all_met = False
+            print(f"Package {package.package_id} missed its deadline! "
+                  f"Delivered at {package.delivery_time}, Deadline: {package.deadline_time}")
+    if all_met:
+        print("All package deadlines have been met.")
+
 # Calculates distance between two addresses
 def distance_between(x_value, y_value):
     distance = csv_distance[x_value][y_value]
@@ -106,7 +118,7 @@ def nearest_neighbor(truck):
     # Cycle through the list of not_delivered until none remain in the list
     # Adds the nearest package into the truck.packages list one by one
     while len(not_delivered) > 0:
-        next_address = 2000
+        next_address = float('inf')
         next_package = None
         for package in not_delivered:
             if distance_between(extract_address(truck.address), extract_address(package.address)) <= next_address:
@@ -135,6 +147,8 @@ if truck3.depart_time < datetime.timedelta(hours=10, minutes=20):
     truck3.depart_time = datetime.timedelta(hours=10, minutes=20)
 
 nearest_neighbor(truck3)
+
+check_all_deadlines()
 
 if __name__ == "__main__":
     # User Interface
