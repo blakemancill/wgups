@@ -17,6 +17,21 @@ with open("data/addresses.csv") as csvfile1:
 
 package_hash_table = ChainingHashTable()
 
+
+def display_packages_by_truck(convert_timedelta):
+    trucks = [
+        ("Truck 1", [1, 13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40]),
+        ("Truck 2", [3, 12, 17, 18, 19, 21, 22, 23, 24, 26, 27, 35, 36, 38, 39]),
+        ("Truck 3", [2, 4, 5, 6, 7, 8, 9, 10, 11, 25, 28, 32, 33])
+    ]
+
+    for truck_name, package_ids in trucks:
+        print(f"\n{truck_name}:")
+        for package_id in package_ids:
+            package = package_hash_table.lookup(package_id)
+            package.update_status(convert_timedelta)
+            print(str(package) + "\n")
+
 # Creates package objects from the csv data, and loads package objects into hash table
 def load_package_data(filename, package_hash_table):
     with open(filename) as package_info:
@@ -62,10 +77,10 @@ truck1 = Truck(16, 18, None, [1, 13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40], 0.
                      datetime.timedelta(hours=8))
 
 truck2 = Truck(16, 18, None, [3, 12, 17, 18, 19, 21, 22, 23, 24, 26, 27, 35, 36, 38, 39], 0.0,
-                     "4001 South 700 East", datetime.timedelta(hours=10, minutes=20))
+                     "4001 South 700 East", datetime.timedelta(hours=8))
 
 truck3 = Truck(16, 18, None, [2, 4, 5, 6, 7, 8, 9, 10, 11, 25, 28, 32, 33], 0.0, "4001 South 700 East",
-                     datetime.timedelta(hours=9, minutes=5))
+                     datetime.timedelta(hours=8))
 
 # Load packages into hash table
 load_package_data("data/packages.csv", package_hash_table)
@@ -75,6 +90,7 @@ load_package_data("data/packages.csv", package_hash_table)
 def nearest_neighbor(truck):
     # Place all packages into array of not delivered
     not_delivered = []
+    truck.time = truck.depart_time
     for package_id in truck.packages:
         package = package_hash_table.lookup(package_id)
         not_delivered.append(package)
@@ -140,9 +156,11 @@ if __name__ == "__main__":
             if convert_timedelta >= datetime.timedelta(hours=10, minutes=20):
                 update_package_9_address()
 
-            # The user will be asked if they want to see the status of all packages or only one
-            second_input = input("To view the status of an individual package please type 'solo'. For a rundown of all"
-                                 " packages please type 'all'.")
+            # The user will be asked if they want to see the status of all packages or only one, as well as trucks
+            second_input = input("To view the status of an individual package please type 'solo'. "
+                                 "For all packages grouped by truck type 'trucks'. "
+                                 "For all packages in one list type 'all'.")
+
             # If the user enters "solo" the program will ask for one package ID
             if second_input == "solo":
                 try:
@@ -154,6 +172,14 @@ if __name__ == "__main__":
                 except ValueError:
                     print("Entry invalid. Closing program.")
                     exit()
+
+            elif second_input == "trucks":
+                try:
+                    display_packages_by_truck(convert_timedelta)
+                except Exception as e:
+                    print(f"Error displaying trucks: {e}")
+                    exit()
+
             # If the user types "all" the program will display all package information at once
             elif second_input == "all":
                 try:
