@@ -1,7 +1,9 @@
 # Student ID: 010659388
 import csv
+import datetime
 
 from common.package import Package
+from common.truck import Truck
 
 # Read the csv files and place them into a list
 with open("data/distances.csv") as csvfile:
@@ -43,3 +45,19 @@ def distance_between(x_value, y_value):
     if distance == '':
         distance = csv_distance[y_value][x_value]
     return float(distance)
+
+# Gets address number from string of address
+def extract_address(address):
+    for row in csv_address:
+        if address in row[2]:
+            return int(row[0])
+
+# Create truck objects
+truck1 = Truck(16, 18, None, [1, 13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40], 0.0, "4001 South 700 East",
+                     datetime.timedelta(hours=8))
+
+truck2 = Truck(16, 18, None, [3, 6, 12, 17, 18, 19, 21, 22, 23, 24, 26, 27, 35, 36, 38, 39], 0.0,
+                     "4001 South 700 East", datetime.timedelta(hours=10, minutes=20))
+
+truck3 = Truck(16, 18, None, [2, 4, 5, 6, 7, 8, 9, 10, 11, 25, 28, 32, 33], 0.0, "4001 South 700 East",
+                     datetime.timedelta(hours=9, minutes=5))
