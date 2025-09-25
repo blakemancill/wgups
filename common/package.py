@@ -1,4 +1,3 @@
-
 class Package:
     def __init__(self, id, address, city, state, zipcode, deadline_time, weight, status, departure_time, delivery_time):
         self.id = id
