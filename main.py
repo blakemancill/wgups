@@ -101,7 +101,7 @@ def nearest_neighbor(
         package_hash_table: ChainingHashTable,
         csv_address: List[List[str]],
         csv_distance: List[List[str]]
-):
+) -> None:
     not_delivered: List[Package] = [package_hash_table.lookup(pid) for pid in truck.packages]
     not_delivered = [p for p in not_delivered if p is not None]
 
@@ -120,6 +120,7 @@ def nearest_neighbor(
             # Wait until the earliest package becomes available
             next_available_time = min(getattr(p, "available_time", datetime.timedelta(hours=8)) for p in not_delivered)
             truck.time = next_available_time
+            continue
         else:
             # Sort by earliest deadline, then by shortest distance
             ready_packages.sort(
