@@ -1,8 +1,16 @@
 import datetime
 
 from common.package_utils import update_package_9_address, check_all_deadlines
-from colorama import Fore, Style, init
-init(autoreset=True)
+try:
+    from colorama import Fore, Style
+    COLORAMA_AVAILABLE = True
+except ImportError:
+    COLORAMA_AVAILABLE = False
+    class Fore:
+        RED = GREEN = BLUE = YELLOW = MAGENTA = CYAN = WHITE = BLACK = RESET = ""
+    class Style:
+        BRIGHT = DIM = NORMAL = RESET_ALL = ""
+    print("Note: colorama not available - running without colors")
 
 class UserInterface:
     def __init__(self, package_hash_table, trucks):

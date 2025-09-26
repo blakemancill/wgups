@@ -1,4 +1,13 @@
-from colorama import Fore, Style
+try:
+    from colorama import Fore, Style
+    COLORAMA_AVAILABLE = True
+except ImportError:
+    COLORAMA_AVAILABLE = False
+    class Fore:
+        RED = GREEN = BLUE = YELLOW = MAGENTA = CYAN = WHITE = BLACK = RESET = ""
+    class Style:
+        BRIGHT = DIM = NORMAL = RESET_ALL = ""
+    print("Note: colorama not available - running without colors")
 
 from common.chaining_hash_table import ChainingHashTable
 
