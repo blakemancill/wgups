@@ -1,6 +1,7 @@
 import pytest
 import datetime
 import sys, os
+import csv
 
 from main import (
     extract_address, distance_between,
@@ -14,30 +15,53 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 class TestWGUPSConstraints:
     """Test suite for WGUPS package delivery constraints"""
 
-    @pytest.fixture
-    def wgups_system(self):
+    def load_system(self, data_dir=None):
+        """Helper function to load CSVs and initialize system"""
         base_dir = os.path.dirname(os.path.dirname(__file__))
-        data_dir = os.path.join(base_dir, "data")
+        data_dir = data_dir or os.path.join(base_dir, "data")
 
-        # Load the CSVs
-        import csv
         with open(os.path.join(data_dir, "distances.csv")) as f:
             csv_distance = list(csv.reader(f))
         with open(os.path.join(data_dir, "addresses.csv")) as f:
             csv_address = list(csv.reader(f))
 
         package_hash_table, truck1, truck2, truck3 = init_system(data_dir)
+        return package_hash_table, truck1, truck2, truck3, csv_address, csv_distance
+
+    @pytest.fixture
+    def wgups_system(self):
+        """Fixture to initialize and simulate deliveries for all trucks"""
+        package_hash_table, truck1, truck2, truck3, csv_address, csv_distance = self.load_system()
 
         nearest_neighbor(truck1, package_hash_table, csv_address, csv_distance)
         nearest_neighbor(truck2, package_hash_table, csv_address, csv_distance)
+
         truck3.depart_time = max(datetime.timedelta(hours=9, minutes=5),
                                  min(truck1.time, truck2.time))
         nearest_neighbor(truck3, package_hash_table, csv_address, csv_distance)
 
-        return package_hash_table, truck1, truck2, truck3
+        return package_hash_table, truck1, truck2, truck3, csv_address, csv_distance
 
     def test_packages_must_be_on_truck2(self, wgups_system):
-        """Test that packages 2, 17, 35, 37 are on truck 2"""
-        _, _, truck2, _ = wgups_system
+        _, _, truck2, _, _, _ = wgups_system
         expected_packages = {2, 17, 35, 37}
         assert expected_packages.issubset(set(truck2.packages))
+
+    def test_package_9_address_update_and_timing(self):
+        package_hash_table, truck1, truck2, truck3, csv_address, csv_distance = self.load_system()
+
+        # Deliver trucks 1 and 2 before 10:20am
+        nearest_neighbor(truck1, package_hash_table, csv_address, csv_distance)
+        nearest_neighbor(truck2, package_hash_table, csv_address, csv_distance)
+
+        # Truck 3 departs before 10:20am
+        truck3.depart_time = datetime.timedelta(hours=9, minutes=5)
+        nearest_neighbor(truck3, package_hash_table, csv_address, csv_distance)
+
+        package_9 = package_hash_table.lookup(9)
+        # Before 10:20am, address should be original
+        assert package_9.address != "410 S State St"
+
+        # Update package 9 after 10:20am
+        update_package_9_address(package_hash_table)
+        assert package_9.address == "410 S State St"
