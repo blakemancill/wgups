@@ -96,3 +96,8 @@ class TestWGUPSConstraints:
                 f"Package {package.package_id} missed its deadline! "
                 f"Delivered at {package.delivery_time}, Deadline: {package.deadline_time}"
             )
+
+    def test_total_mileage_under_140(self, wgups_system):
+        _, truck1, truck2, truck3, _, _ = wgups_system
+        total_mileage = truck1.mileage + truck2.mileage + truck3.mileage
+        assert total_mileage <= 140, f"Total mileage exceeded: {total_mileage:.2f} miles"
