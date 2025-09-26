@@ -1,6 +1,6 @@
 import datetime
 
-from main import update_package_9_address
+from common.package_utils import update_package_9_address
 
 class UserInterface:
     def __init__(self, package_hash_table, trucks):

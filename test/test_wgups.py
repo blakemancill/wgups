@@ -3,12 +3,8 @@ import datetime
 import sys, os
 import csv
 
-from main import (
-    extract_address, distance_between,
-    load_package_data, nearest_neighbor,
-    update_package_9_address, check_all_deadlines,
-    init_system
-)
+from main import nearest_neighbor, init_system
+from common.package_utils import update_package_9_address
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
