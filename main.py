@@ -15,10 +15,99 @@ with open("data/addresses.csv") as csvfile1:
     csv_address = csv.reader(csvfile1)
     csv_address = list(csv_address)
 
-package_hash_table = ChainingHashTable()
+
+def init_system():
+    package_hash_table = ChainingHashTable()
+    load_package_data("data/packages.csv", package_hash_table)
+
+    # Create truck objects
+    truck1 = Truck(16, 18, None, [1, 13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40], 0.0, "4001 South 700 East",
+                   datetime.timedelta(hours=8))
+
+    truck2 = Truck(16, 18, None, [3, 12, 17, 18, 19, 21, 22, 23, 24, 26, 27, 35, 36, 38, 39], 0.0,
+                   "4001 South 700 East", datetime.timedelta(hours=8))
+
+    truck3 = Truck(16, 18, None, [2, 9, 4, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33], 0.0, "4001 South 700 East",
+                   datetime.timedelta(hours=9, minutes=5))
 
 
-def display_packages_by_truck(convert_timedelta):
+    return package_hash_table, truck1, truck2, truck3
+
+def main():
+    package_hash_table, truck1, truck2, truck3 = init_system()
+    nearest_neighbor(truck1, package_hash_table)
+    nearest_neighbor(truck2, package_hash_table)
+
+    truck3.depart_time = min(truck1.time, truck2.time)
+    if truck3.depart_time < datetime.timedelta(hours=9, minutes=5):
+        truck3.depart_time = datetime.timedelta(hours=9, minutes=5)
+    nearest_neighbor(truck3, package_hash_table)
+
+    check_all_deadlines(package_hash_table)
+
+    # User Interface
+    # Upon running the program, the below message will appear.
+    print("Western Governors University Parcel Service (WGUPS)")
+    print("The mileage for the route is:")
+    print(truck1.mileage + truck2.mileage + truck3.mileage)  # Print total mileage for all trucks
+    # The user will be asked to start the process by entering the word "time"
+    text = input("To start please type the word 'time' (All else will cause the program to quit).")
+    # If the user doesn't type "leave" the program will ask for a specific time in regard to checking packages
+    if text == "time":
+        try:
+            # The user will be asked to enter a specific time
+            user_time = input("Please enter a time to check status of package(s). Use the following format, HH:MM:SS")
+            (h, m, s) = user_time.split(":")
+            convert_timedelta = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
+
+            # Updates package 9 delivery address
+            if convert_timedelta >= datetime.timedelta(hours=10, minutes=20):
+                update_package_9_address(package_hash_table)
+
+            # The user will be asked if they want to see the status of all packages or only one, as well as trucks
+            second_input = input("To view the status of an individual package please type 'solo'. "
+                                 "For all packages grouped by truck type 'trucks'. "
+                                 "For all packages in one list type 'all'.")
+
+            # If the user enters "solo" the program will ask for one package ID
+            if second_input == "solo":
+                try:
+                    # The user will be asked to input a package ID. Invalid entry will cause the program to quit
+                    solo_input = input("Enter the numeric package ID")
+                    package = package_hash_table.lookup(int(solo_input))
+                    package.update_status(convert_timedelta)
+                    print(str(package))
+                except ValueError:
+                    print("Entry invalid. Closing program.")
+                    exit()
+
+            elif second_input == "trucks":
+                try:
+                    display_packages_by_truck(package_hash_table, convert_timedelta)
+                except Exception as e:
+                    print(f"Error displaying trucks: {e}")
+                    exit()
+
+            # If the user types "all" the program will display all package information at once
+            elif second_input == "all":
+                try:
+                    for packageID in range(1, 41):
+                        package = package_hash_table.lookup(packageID)
+                        package.update_status(convert_timedelta)
+                        print(str(package) + "\n")
+                except ValueError:
+                    print("Entry invalid. Closing program.")
+                    exit()
+            else:
+                exit()
+        except ValueError:
+            print("Entry invalid. Closing program.")
+            exit()
+    elif input != "time":
+        print("Entry invalid. Closing program.")
+        exit()
+
+def display_packages_by_truck(package_hash_table, convert_timedelta):
     trucks = [
         ("Truck 1", [1,  13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40]),
         ("Truck 2", [3, 12, 17, 18, 19, 21, 22, 23, 24, 26, 27, 35, 36, 38, 39]),
@@ -54,7 +143,7 @@ def load_package_data(filename, package_hash_table):
             package_hash_table.insert(package_id, package)
 
 # Checks if packages were delivered before their deadline
-def check_all_deadlines():
+def check_all_deadlines(package_hash_table):
     all_met = True
     for package_id in range(1, 41):
         package = package_hash_table.lookup(package_id)
@@ -79,25 +168,12 @@ def extract_address(address):
             return int(row[0])
 
 # Update package 9's address at 10:20am
-def update_package_9_address():
+def update_package_9_address(package_hash_table):
     package_9 = package_hash_table.lookup(9)
     package_9.address = "410 S State St"
     package_9.zipcode = "84111"
 
-# Create truck objects
-truck1 = Truck(16, 18, None, [1, 13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40], 0.0, "4001 South 700 East",
-                     datetime.timedelta(hours=8))
-
-truck2 = Truck(16, 18, None, [3, 12, 17, 18, 19, 21, 22, 23, 24, 26, 27, 35, 36, 38, 39], 0.0,
-                     "4001 South 700 East", datetime.timedelta(hours=8))
-
-truck3 = Truck(16, 18, None, [2, 9, 4, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33], 0.0, "4001 South 700 East",
-                     datetime.timedelta(hours=9, minutes=5))
-
-# Load packages into hash table
-load_package_data("data/packages.csv", package_hash_table)
-
-def nearest_neighbor(truck):
+def nearest_neighbor(truck, package_hash_table):
     not_delivered = [package_hash_table.lookup(pid) for pid in truck.packages]
     truck.packages.clear()
     truck.time = truck.depart_time
@@ -128,78 +204,5 @@ def nearest_neighbor(truck):
         truck.packages.append(next_package.package_id)
         not_delivered.remove(next_package)
 
-
-nearest_neighbor(truck1)
-nearest_neighbor(truck2)
-
-# Two drivers: Truck 3 departs when first driver returns, but not before 9:05am due to delayed packages
-truck3.depart_time = min(truck1.time, truck2.time)
-if truck3.depart_time < datetime.timedelta(hours=9, minutes=5):
-    truck3.depart_time = datetime.timedelta(hours=9, minutes=5)
-
-nearest_neighbor(truck3)
-
-check_all_deadlines()
-
 if __name__ == "__main__":
-    # User Interface
-    # Upon running the program, the below message will appear.
-    print("Western Governors University Parcel Service (WGUPS)")
-    print("The mileage for the route is:")
-    print(truck1.mileage + truck2.mileage + truck3.mileage)  # Print total mileage for all trucks
-    # The user will be asked to start the process by entering the word "time"
-    text = input("To start please type the word 'time' (All else will cause the program to quit).")
-    # If the user doesn't type "leave" the program will ask for a specific time in regard to checking packages
-    if text == "time":
-        try:
-            # The user will be asked to enter a specific time
-            user_time = input("Please enter a time to check status of package(s). Use the following format, HH:MM:SS")
-            (h, m, s) = user_time.split(":")
-            convert_timedelta = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
-
-            # Updates package 9 delivery address
-            if convert_timedelta >= datetime.timedelta(hours=10, minutes=20):
-                update_package_9_address()
-
-            # The user will be asked if they want to see the status of all packages or only one, as well as trucks
-            second_input = input("To view the status of an individual package please type 'solo'. "
-                                 "For all packages grouped by truck type 'trucks'. "
-                                 "For all packages in one list type 'all'.")
-
-            # If the user enters "solo" the program will ask for one package ID
-            if second_input == "solo":
-                try:
-                    # The user will be asked to input a package ID. Invalid entry will cause the program to quit
-                    solo_input = input("Enter the numeric package ID")
-                    package = package_hash_table.lookup(int(solo_input))
-                    package.update_status(convert_timedelta)
-                    print(str(package))
-                except ValueError:
-                    print("Entry invalid. Closing program.")
-                    exit()
-
-            elif second_input == "trucks":
-                try:
-                    display_packages_by_truck(convert_timedelta)
-                except Exception as e:
-                    print(f"Error displaying trucks: {e}")
-                    exit()
-
-            # If the user types "all" the program will display all package information at once
-            elif second_input == "all":
-                try:
-                    for packageID in range(1, 41):
-                        package = package_hash_table.lookup(packageID)
-                        package.update_status(convert_timedelta)
-                        print(str(package) + "\n")
-                except ValueError:
-                    print("Entry invalid. Closing program.")
-                    exit()
-            else:
-                exit()
-        except ValueError:
-            print("Entry invalid. Closing program.")
-            exit()
-    elif input != "time":
-        print("Entry invalid. Closing program.")
-        exit()
+    main()
