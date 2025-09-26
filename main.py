@@ -4,8 +4,10 @@ import datetime
 import os
 
 from common.ChainingHashTable import ChainingHashTable
+from common.UserInterface import UserInterface
 from common.package import Package
 from common.truck import Truck
+from common.package_utils import check_all_deadlines, extract_address, distance_between
 
 def init_system(data_dir="data"):
     package_hash_table = ChainingHashTable()
@@ -38,66 +40,8 @@ def main():
     check_all_deadlines(package_hash_table)
 
     # User Interface
-    # Upon running the program, the below message will appear.
-    print("Western Governors University Parcel Service (WGUPS)")
-    print("The mileage for the route is:")
-    print(trucks[0].mileage + trucks[1].mileage + trucks[2].mileage)  # Print total mileage for all trucks
-    # The user will be asked to start the process by entering the word "time"
-    text = input("To start please type the word 'time' (All else will cause the program to quit).")
-    # If the user doesn't type "leave" the program will ask for a specific time in regard to checking packages
-    if text == "time":
-        try:
-            # The user will be asked to enter a specific time
-            user_time = input("Please enter a time to check status of package(s). Use the following format, HH:MM:SS")
-            (h, m, s) = user_time.split(":")
-            convert_timedelta = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
-
-            # Updates package 9 delivery address
-            if convert_timedelta >= datetime.timedelta(hours=10, minutes=20):
-                update_package_9_address(package_hash_table)
-
-            # The user will be asked if they want to see the status of all packages or only one, as well as trucks
-            second_input = input("To view the status of an individual package please type 'solo'. "
-                                 "For all packages grouped by truck type 'trucks'. "
-                                 "For all packages in one list type 'all'.")
-
-            # If the user enters "solo" the program will ask for one package ID
-            if second_input == "solo":
-                try:
-                    # The user will be asked to input a package ID. Invalid entry will cause the program to quit
-                    solo_input = input("Enter the numeric package ID")
-                    package = package_hash_table.lookup(int(solo_input))
-                    package.update_status(convert_timedelta)
-                    print(str(package))
-                except ValueError:
-                    print("Entry invalid. Closing program.")
-                    exit()
-
-            elif second_input == "trucks":
-                try:
-                    display_packages_by_truck(package_hash_table, convert_timedelta)
-                except Exception as e:
-                    print(f"Error displaying trucks: {e}")
-                    exit()
-
-            # If the user types "all" the program will display all package information at once
-            elif second_input == "all":
-                try:
-                    for packageID in range(1, 41):
-                        package = package_hash_table.lookup(packageID)
-                        package.update_status(convert_timedelta)
-                        print(str(package) + "\n")
-                except ValueError:
-                    print("Entry invalid. Closing program.")
-                    exit()
-            else:
-                exit()
-        except ValueError:
-            print("Entry invalid. Closing program.")
-            exit()
-    elif input != "time":
-        print("Entry invalid. Closing program.")
-        exit()
+    ui = UserInterface(package_hash_table, trucks)
+    ui.start()
 
 def get_truck_definitions():
     """
@@ -145,37 +89,6 @@ def load_package_data(filename, package_hash_table):
             )
 
             package_hash_table.insert(package_id, package)
-
-# Checks if packages were delivered before their deadline
-def check_all_deadlines(package_hash_table):
-    all_met = True
-    for package_id in range(1, 41):
-        package = package_hash_table.lookup(package_id)
-        if package.delivery_time > package.deadline_time:
-            all_met = False
-            print(f"Package {package.package_id} missed its deadline! "
-                  f"Delivered at {package.delivery_time}, Deadline: {package.deadline_time}")
-    if all_met:
-        print("All package deadlines have been met.")
-
-# Calculates distance between two addresses
-def distance_between(x_value, y_value, csv_distance):
-    distance = csv_distance[x_value][y_value]
-    if distance == '':
-        distance = csv_distance[y_value][x_value]
-    return float(distance)
-
-# Gets address number from string of address
-def extract_address(address, csv_address):
-    for row in csv_address:
-        if address in row[2]:
-            return int(row[0])
-
-# Update package 9's address at 10:20am
-def update_package_9_address(package_hash_table):
-    package_9 = package_hash_table.lookup(9)
-    package_9.address = "410 S State St"
-    package_9.zipcode = "84111"
 
 def nearest_neighbor(truck, package_hash_table, csv_address, csv_distance):
     not_delivered = [package_hash_table.lookup(pid) for pid in truck.packages]
