@@ -1,6 +1,8 @@
 from datetime import timedelta, datetime
 from typing import Optional
 
+from package_utils import truncate
+
 def parse_deadline(deadline_str: str) -> timedelta:
     """
     Converts a deadline string from the CSV into a timedelta object.
@@ -62,14 +64,16 @@ class Package:
 
     def short_str(self, truck_num: str = "--") -> str:
         """Returns a one-line summary for tables (Truck, ID, Address, Status, Delivery)."""
-        status_icon = "✅" if self.status == "Delivered" \
-            else "🚚" if self.status == "En route" \
+        status_icon = (
+            "✅" if self.status == "Delivered"
+            else "🚚" if self.status == "En route"
             else "🏠"
+        )
 
         return (f""
                 f"{self.package_id:<5}"
                 f"{truck_num:<7}"
-                f"{self.address:<25}"
+                f"{truncate(self.address, 25):<25}"
                 f"{status_icon + ' ' + self.status:<15}"
                 f"{str(self.delivery_time) if self.delivery_time else '--':<10}")
 

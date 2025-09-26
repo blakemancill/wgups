@@ -1,7 +1,7 @@
 import datetime
 
-from common.package_utils import update_package_9_address, check_all_deadlines, truncate
-from colorama import Fore, Back, Style, init
+from common.package_utils import update_package_9_address, check_all_deadlines
+from colorama import Fore, Style, init
 init(autoreset=True)
 
 class UserInterface:

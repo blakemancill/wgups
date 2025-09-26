@@ -7,7 +7,7 @@ from common.chaining_hash_table import ChainingHashTable
 from common.user_interface import UserInterface
 from common.package import Package
 from common.truck import Truck
-from common.package_utils import check_all_deadlines, extract_address, distance_between
+from common.package_utils import extract_address, distance_between
 
 def init_system(data_dir="data"):
     package_hash_table = ChainingHashTable()
