@@ -84,15 +84,14 @@ class UserInterface:
             print(Fore.RED + Style.BRIGHT + "❌ Entry invalid. Closing program.")
 
     def show_packages_by_truck(self, convert_timedelta):
-        from main import get_truck_definitions  # Avoid circular import
-        trucks = get_truck_definitions()
-        for idx, truck in enumerate(trucks, start=1):
-            print(Fore.YELLOW + Style.BRIGHT + f"\n📦 Truck {idx} Packages 📦")
+        for idx, truck in enumerate(self.trucks, start=1):
+            print(Fore.YELLOW + Style.BRIGHT + f"\n{truck.summary(idx)}")
             print(Fore.CYAN + f"{'ID':<5}{'Address':<25}{'Status':<15}{'Delivery':<10}")
             print("-" * 60)
-            package = self.package_hash_table.lookup(pid)
-            package.update_status(convert_timedelta)
-            print(package.short_str())
+            for package_id in truck.packages:
+                package = self.package_hash_table.lookup(package_id)
+                package.update_status(convert_timedelta)
+                print(package.short_str(idx))
 
     def show_all_packages(self, convert_timedelta):
         print(Fore.YELLOW + Style.BRIGHT + "\n📦 All Packages 📦")

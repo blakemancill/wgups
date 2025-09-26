@@ -1,7 +1,6 @@
 from datetime import timedelta, datetime
-from typing import Optional
 
-from package_utils import truncate
+from common.package_utils import truncate
 
 def parse_deadline(deadline_str: str) -> timedelta:
     """
@@ -30,8 +29,8 @@ class Package:
             deadline_time: str,
             weight: str,
             status: str,
-            departure_time: Optional[timedelta],
-            delivery_time: Optional[timedelta]
+            departure_time: timedelta | None,
+            delivery_time: timedelta | None
     ):
         """
         Initializes a package.

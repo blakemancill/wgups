@@ -29,12 +29,15 @@ def main():
         csv_address = list(csv_address)
 
     package_hash_table, trucks = init_system()
+
     nearest_neighbor(trucks[0], package_hash_table, csv_address, csv_distance)
     nearest_neighbor(trucks[1], package_hash_table, csv_address, csv_distance)
 
-    trucks[2].depart_time = min(trucks[0].time, trucks[1].time)
-    if trucks[2].depart_time < datetime.timedelta(hours=9, minutes=5):
-        trucks[2].depart_time = datetime.timedelta(hours=9, minutes=5)
+    # Truck 3 departs when first 2 are done, but not before 9:05
+    trucks[2].depart_time = max(
+        datetime.timedelta(hours=9, minutes=5),
+        min(trucks[0].time, trucks[1].time)
+    )
     nearest_neighbor(trucks[2], package_hash_table, csv_address, csv_distance)
 
     # User Interface
@@ -43,20 +46,22 @@ def main():
 
 def get_truck_definitions():
     """
-    Returns a list of truck definitions: (Truck object, package IDs)
+    Returns initialized truck objects with assigned package IDs and departure times
     """
-    truck_data = [
-        # capacity, speed, load, package_ids, mileage, start_address, depart_time
-        (16, 18, None, [1, 13, 14, 15, 19, 16, 20, 27, 29, 30, 31, 34, 40], 0.0, "4001 South 700 East", datetime.timedelta(hours=8)),
-        (16, 18, None, [2, 12, 17, 18, 21, 22, 23, 24, 26, 37, 35, 36, 38, 39], 0.0, "4001 South 700 East", datetime.timedelta(hours=8)),
-        (16, 18, None, [3, 4, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33, 9], 0.0, "4001 South 700 East", datetime.timedelta(hours=9, minutes=5))
+    return [
+        Truck(
+            packages=[1, 13, 14, 15, 19, 16, 20, 27, 29, 30, 31, 34, 40],
+            depart_time=datetime.timedelta(hours=8)
+        ),
+        Truck(
+            packages=[2, 12, 17, 18, 21, 22, 23, 24, 26, 37, 35, 36, 38, 39],
+            depart_time=datetime.timedelta(hours=8)
+        ),
+        Truck(
+            packages=[3, 4, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33, 9],
+            depart_time=datetime.timedelta(hours=9, minutes=5)
+        ),
     ]
-
-    trucks = []
-    for data in truck_data:
-        truck = Truck(*data)
-        trucks.append(truck)
-    return trucks
 
 # Creates package objects from the csv data, and loads package objects into hash table
 def load_package_data(filename, package_hash_table):
