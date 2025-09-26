@@ -11,7 +11,8 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 class TestWGUPSConstraints:
     """Test suite for WGUPS package delivery constraints"""
 
-    def load_system(self, data_dir=None):
+    @staticmethod
+    def load_system(data_dir=None):
         """Helper function to load CSVs and initialize system"""
         base_dir = os.path.dirname(os.path.dirname(__file__))
         data_dir = data_dir or os.path.join(base_dir, "data")
