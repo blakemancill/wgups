@@ -101,3 +101,27 @@ class TestWGUPSConstraints:
         _, truck1, truck2, truck3, _, _ = wgups_system
         total_mileage = truck1.mileage + truck2.mileage + truck3.mileage
         assert total_mileage <= 140, f"Total mileage exceeded: {total_mileage:.2f} miles"
+
+    def test_package_9_delivery_time(self):
+        """Tests that package 9 is delivered after 10:20 AM"""
+        package_hash_table, truck1, truck2, truck3, csv_address, csv_distance = self.load_system()
+
+        # Deliver trucks 1 and 2 first
+        nearest_neighbor(truck1, package_hash_table, csv_address, csv_distance)
+        nearest_neighbor(truck2, package_hash_table, csv_address, csv_distance)
+
+        # Truck 3 departs at 9:05
+        truck3.depart_time = datetime.timedelta(hours=9, minutes=5)
+        nearest_neighbor(truck3, package_hash_table, csv_address, csv_distance)
+
+        # Update address at 10:20
+        update_package_9_address(package_hash_table)
+
+        package_9 = package_hash_table.lookup(9)
+
+        # Ensure delivery time is after 10:20
+        ten_twenty_am = datetime.timedelta(hours=10, minutes=20)
+        assert package_9.delivery_time >= ten_twenty_am, (
+            f"Package 9 was delivered at {package_9.delivery_time}, "
+            f"before the address update at 10:20 AM"
+        )
