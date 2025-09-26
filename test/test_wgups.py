@@ -25,30 +25,33 @@ class TestWGUPSConstraints:
         with open(os.path.join(data_dir, "addresses.csv")) as f:
             csv_address = list(csv.reader(f))
 
-        package_hash_table, truck1, truck2, truck3 = init_system(data_dir)
-        return package_hash_table, truck1, truck2, truck3, csv_address, csv_distance
+        package_hash_table, trucks = init_system(data_dir)
+        return package_hash_table, trucks, csv_address, csv_distance
 
     @pytest.fixture
     def wgups_system(self):
         """Fixture to initialize and simulate deliveries for all trucks"""
-        package_hash_table, truck1, truck2, truck3, csv_address, csv_distance = self.load_system()
+        package_hash_table, trucks, csv_address, csv_distance = self.load_system()
 
-        nearest_neighbor(truck1, package_hash_table, csv_address, csv_distance)
-        nearest_neighbor(truck2, package_hash_table, csv_address, csv_distance)
+        nearest_neighbor(trucks[0], package_hash_table, csv_address, csv_distance)
+        nearest_neighbor(trucks[1], package_hash_table, csv_address, csv_distance)
 
-        truck3.depart_time = max(datetime.timedelta(hours=9, minutes=5),
-                                 min(truck1.time, truck2.time))
-        nearest_neighbor(truck3, package_hash_table, csv_address, csv_distance)
+        trucks[2].depart_time = max(datetime.timedelta(hours=9, minutes=5),
+                                    min(trucks[0].time, trucks[1].time))
+        nearest_neighbor(trucks[2], package_hash_table, csv_address, csv_distance)
 
-        return package_hash_table, truck1, truck2, truck3, csv_address, csv_distance
+        return package_hash_table, trucks, csv_address, csv_distance
 
     def test_packages_must_be_on_truck2(self, wgups_system):
-        _, _, truck2, _, _, _ = wgups_system
+        package_hash_table, trucks, csv_address, csv_distance = wgups_system
+        truck1, truck2, truck3 = trucks
+
         expected_packages = {2, 17, 35, 37}
         assert expected_packages.issubset(set(truck2.packages))
 
     def test_package_9_address_update_and_timing(self):
-        package_hash_table, truck1, truck2, truck3, csv_address, csv_distance = self.load_system()
+        package_hash_table, trucks, csv_address, csv_distance = self.load_system()
+        truck1, truck2, truck3 = trucks
 
         # Deliver trucks 1 and 2 before 10:20am
         nearest_neighbor(truck1, package_hash_table, csv_address, csv_distance)
@@ -68,13 +71,15 @@ class TestWGUPSConstraints:
 
     def test_late_arriving_packages_departure_time(self):
         """Test that truck with late packages (6, 25, 28, 32) leaves after 9:05"""
-        _, _, _, truck3, _, _ = self.load_system()
+        package_hash_table, trucks, csv_address, csv_distance = self.load_system()
+        truck1, truck2, truck3 = trucks
         assert truck3.depart_time >= datetime.timedelta(hours=9, minutes=5), \
             "Truck 3 should depart at or after 9:05 AM"
 
     def test_packages_delivered_together(self):
         """Tests that packages 13, 15, 19 are delivered together on the same truck"""
-        _, truck1, truck2, truck3, _, _ = self.load_system()
+        package_hash_table, trucks, csv_address, csv_distance = self.load_system()
+        truck1, truck2, truck3 = trucks
         package_set = {13, 15, 19}
 
         trucks = [truck1, truck2, truck3]
@@ -87,7 +92,7 @@ class TestWGUPSConstraints:
 
     def test_all_packages_delivered_before_deadline(self, wgups_system):
         """Tests that all packages meet their deadlines"""
-        package_hash_table, _, _, _, _, _ = wgups_system
+        package_hash_table, _, _, _ = wgups_system
 
         for package_id in range(1, 41):
             package = package_hash_table.lookup(package_id)
@@ -98,13 +103,15 @@ class TestWGUPSConstraints:
             )
 
     def test_total_mileage_under_140(self, wgups_system):
-        _, truck1, truck2, truck3, _, _ = wgups_system
+        _, trucks, _, _ = wgups_system
+        truck1, truck2, truck3 = trucks
         total_mileage = truck1.mileage + truck2.mileage + truck3.mileage
         assert total_mileage <= 140, f"Total mileage exceeded: {total_mileage:.2f} miles"
 
     def test_package_9_delivery_time(self):
         """Tests that package 9 is delivered after 10:20 AM"""
-        package_hash_table, truck1, truck2, truck3, csv_address, csv_distance = self.load_system()
+        package_hash_table, trucks, csv_address, csv_distance = self.load_system()
+        truck1, truck2, truck3 = trucks
 
         # Deliver trucks 1 and 2 first
         nearest_neighbor(truck1, package_hash_table, csv_address, csv_distance)
@@ -128,7 +135,8 @@ class TestWGUPSConstraints:
 
     def test_truck_capacities_not_exceeded(self, wgups_system):
         """Ensure no truck carries more packages than its maximum capacity."""
-        _, truck1, truck2, truck3, _, _ = wgups_system
+        _, trucks, _, _ = wgups_system
+        truck1, truck2, truck3 = trucks
 
         for truck in [truck1, truck2, truck3]:
             assert len(truck.packages) <= truck.capacity, (
@@ -137,7 +145,8 @@ class TestWGUPSConstraints:
 
     def test_all_packages_assigned(self, wgups_system):
         """Ensure all packages are assigned to one of the trucks."""
-        _, truck1, truck2, truck3, _, _ = wgups_system
+        _, trucks, _, _ = wgups_system
+        truck1, truck2, truck3 = trucks
 
         all_packages = set(truck1.packages + truck2.packages + truck3.packages)
         expected_packages = set(range(1, 41))  # Packages 1 through 40

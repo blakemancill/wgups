@@ -12,17 +12,9 @@ def init_system(data_dir="data"):
     load_package_data(os.path.join(data_dir, "packages.csv"), package_hash_table)
 
     # Create truck objects
-    truck1 = Truck(16, 18, None, [1, 13, 14, 15, 19, 16, 20, 27, 29, 30, 31, 34, 40], 0.0, "4001 South 700 East",
-                   datetime.timedelta(hours=8))
+    trucks = get_truck_definitions()
 
-    truck2 = Truck(16, 18, None, [2, 12, 17, 18, 21, 22, 23, 24, 26, 37, 35, 36, 38, 39], 0.0,
-                   "4001 South 700 East", datetime.timedelta(hours=8))
-
-    truck3 = Truck(16, 18, None, [3, 4, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33, 9], 0.0, "4001 South 700 East",
-                   datetime.timedelta(hours=9, minutes=5))
-
-
-    return package_hash_table, truck1, truck2, truck3
+    return package_hash_table, trucks
 
 def main():
     # Read the csv files and place them into a list
@@ -34,14 +26,14 @@ def main():
         csv_address = csv.reader(csvfile1)
         csv_address = list(csv_address)
 
-    package_hash_table, truck1, truck2, truck3 = init_system()
-    nearest_neighbor(truck1, package_hash_table, csv_address, csv_distance)
-    nearest_neighbor(truck2, package_hash_table, csv_address, csv_distance)
+    package_hash_table, trucks = init_system()
+    nearest_neighbor(trucks[0], package_hash_table, csv_address, csv_distance)
+    nearest_neighbor(trucks[1], package_hash_table, csv_address, csv_distance)
 
-    truck3.depart_time = min(truck1.time, truck2.time)
-    if truck3.depart_time < datetime.timedelta(hours=9, minutes=5):
-        truck3.depart_time = datetime.timedelta(hours=9, minutes=5)
-    nearest_neighbor(truck3, package_hash_table, csv_address, csv_distance)
+    trucks[2].depart_time = min(trucks[0].time, trucks[1].time)
+    if trucks[2].depart_time < datetime.timedelta(hours=9, minutes=5):
+        trucks[2].depart_time = datetime.timedelta(hours=9, minutes=5)
+    nearest_neighbor(trucks[2], package_hash_table, csv_address, csv_distance)
 
     check_all_deadlines(package_hash_table)
 
@@ -49,7 +41,7 @@ def main():
     # Upon running the program, the below message will appear.
     print("Western Governors University Parcel Service (WGUPS)")
     print("The mileage for the route is:")
-    print(truck1.mileage + truck2.mileage + truck3.mileage)  # Print total mileage for all trucks
+    print(trucks[0].mileage + trucks[1].mileage + trucks[2].mileage)  # Print total mileage for all trucks
     # The user will be asked to start the process by entering the word "time"
     text = input("To start please type the word 'time' (All else will cause the program to quit).")
     # If the user doesn't type "leave" the program will ask for a specific time in regard to checking packages
@@ -107,16 +99,28 @@ def main():
         print("Entry invalid. Closing program.")
         exit()
 
-def display_packages_by_truck(package_hash_table, convert_timedelta):
-    trucks = [
-        ("Truck 1", [1,  13, 14, 15, 16, 20, 29, 30, 31, 34, 37, 40]),
-        ("Truck 2", [3, 12, 17, 18, 19, 21, 22, 23, 24, 26, 27, 35, 36, 38, 39]),
-        ("Truck 3", [2, 4, 9, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33])
+def get_truck_definitions():
+    """
+    Returns a list of truck definitions: (Truck object, package IDs)
+    """
+    truck_data = [
+        # capacity, speed, load, package_ids, mileage, start_address, depart_time
+        (16, 18, None, [1, 13, 14, 15, 19, 16, 20, 27, 29, 30, 31, 34, 40], 0.0, "4001 South 700 East", datetime.timedelta(hours=8)),
+        (16, 18, None, [2, 12, 17, 18, 21, 22, 23, 24, 26, 37, 35, 36, 38, 39], 0.0, "4001 South 700 East", datetime.timedelta(hours=8)),
+        (16, 18, None, [3, 4, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33, 9], 0.0, "4001 South 700 East", datetime.timedelta(hours=9, minutes=5))
     ]
 
-    for truck_name, package_ids in trucks:
-        print(f"\n{truck_name}:")
-        for package_id in package_ids:
+    trucks = []
+    for data in truck_data:
+        truck = Truck(*data)
+        trucks.append(truck)
+    return trucks
+
+def display_packages_by_truck(package_hash_table, convert_timedelta):
+    trucks = get_truck_definitions()
+    for idx, truck in enumerate(trucks, start=1):
+        print(f"\nTruck {idx}:")
+        for package_id in truck.packages:
             package = package_hash_table.lookup(package_id)
             package.update_status(convert_timedelta)
             print(str(package) + "\n")
