@@ -60,6 +60,19 @@ class Package:
             output.append(f"Delivery Time: {self.delivery_time}")
         return "\n".join(output)
 
+    def short_str(self, truck_num: str = "--") -> str:
+        """Returns a one-line summary for tables (Truck, ID, Address, Status, Delivery)."""
+        status_icon = "✅" if self.status == "Delivered" \
+            else "🚚" if self.status == "En route" \
+            else "🏠"
+
+        return (f""
+                f"{self.package_id:<5}"
+                f"{truck_num:<7}"
+                f"{self.address:<25}"
+                f"{status_icon + ' ' + self.status:<15}"
+                f"{str(self.delivery_time) if self.delivery_time else '--':<10}")
+
     def update_status(self, convert_timedelta) -> None:
         """
         Update the package's status based on the current time.

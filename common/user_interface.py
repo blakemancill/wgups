@@ -79,13 +79,7 @@ class UserInterface:
         try:
             package = self.package_hash_table.lookup(int(package_id))
             package.update_status(convert_timedelta)
-            status_icon = "✅" if package.status == "Delivered" else "🚚" if package.status == "En route" else "🏠"
-            print(Fore.MAGENTA + Style.BRIGHT + f"\nPackage {package.package_id}")
-            print(f"Address: {package.address}")
-            print(f"Deadline: {package.deadline_time}")
-            print(f"Weight: {package.weight}")
-            print(f"Status: {status_icon} {package.status}")
-            print(f"Delivery Time: {package.delivery_time if package.delivery_time else '--'}\n")
+            print(Fore.MAGENTA + Style.BRIGHT + f"\n{package}\n")
         except Exception:
             print(Fore.RED + Style.BRIGHT + "❌ Entry invalid. Closing program.")
 
