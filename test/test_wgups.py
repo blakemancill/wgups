@@ -84,3 +84,15 @@ class TestWGUPSConstraints:
 
         # There should exist only one truck with all packages
         assert len(trucks_with_all_packages) == 1, "Packages 13, 15, 19 must all be on the same truck"
+
+    def test_all_packages_delivered_before_deadline(self, wgups_system):
+        """Tests that all packages meet their deadlines"""
+        package_hash_table, _, _, _, _, _ = wgups_system
+
+        for package_id in range(1, 41):
+            package = package_hash_table.lookup(package_id)
+            assert package.delivery_time is not None, f"Package {package.package_id} was not delivered!"
+            assert package.delivery_time <= package.deadline_time, (
+                f"Package {package.package_id} missed its deadline! "
+                f"Delivered at {package.delivery_time}, Deadline: {package.deadline_time}"
+            )
