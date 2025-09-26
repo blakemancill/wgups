@@ -65,3 +65,9 @@ class TestWGUPSConstraints:
         # Update package 9 after 10:20am
         update_package_9_address(package_hash_table)
         assert package_9.address == "410 S State St"
+
+    def test_late_arriving_packages_departure_time(self):
+        """Test that truck with late packages (6, 25, 28, 32) leaves after 9:05"""
+        _, _, _, truck3, _, _ = self.load_system()
+        assert truck3.depart_time >= datetime.timedelta(hours=9, minutes=5), \
+            "Truck 3 should depart at or after 9:05 AM"
