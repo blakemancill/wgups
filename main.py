@@ -11,6 +11,7 @@ from common.truck import Truck
 from common.package_utils import extract_address, distance_between
 
 def init_system(data_dir: str = "data") -> Tuple[ChainingHashTable, List[Truck]]:
+    """Returns a tuple containing a hash table, and a list of trucks"""
     package_hash_table = ChainingHashTable()
     load_package_data(os.path.join(data_dir, "packages.csv"), package_hash_table)
 
