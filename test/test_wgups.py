@@ -125,3 +125,24 @@ class TestWGUPSConstraints:
             f"Package 9 was delivered at {package_9.delivery_time}, "
             f"before the address update at 10:20 AM"
         )
+
+    def test_truck_capacities_not_exceeded(self, wgups_system):
+        """Ensure no truck carries more packages than its maximum capacity."""
+        _, truck1, truck2, truck3, _, _ = wgups_system
+
+        for truck in [truck1, truck2, truck3]:
+            assert len(truck.packages) <= truck.capacity, (
+                f"{truck} exceeded capacity: {len(truck.packages)} packages (max {truck.capacity})"
+            )
+
+    def test_all_packages_assigned(self, wgups_system):
+        """Ensure all packages are assigned to one of the trucks."""
+        _, truck1, truck2, truck3, _, _ = wgups_system
+
+        all_packages = set(truck1.packages + truck2.packages + truck3.packages)
+        expected_packages = set(range(1, 41))  # Packages 1 through 40
+
+        assert all_packages == expected_packages, (
+            f"Some packages are missing or duplicated. "
+            f"Assigned: {all_packages}, Expected: {expected_packages}"
+        )
