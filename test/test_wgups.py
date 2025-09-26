@@ -71,3 +71,16 @@ class TestWGUPSConstraints:
         _, _, _, truck3, _, _ = self.load_system()
         assert truck3.depart_time >= datetime.timedelta(hours=9, minutes=5), \
             "Truck 3 should depart at or after 9:05 AM"
+
+    def test_packages_delivered_together(self):
+        """Tests that packages 13, 15, 19 are delivered together on the same truck"""
+        _, truck1, truck2, truck3, _, _ = self.load_system()
+        package_set = {13, 15, 19}
+
+        trucks = [truck1, truck2, truck3]
+        trucks_with_all_packages = [
+            truck for truck in trucks if package_set.issubset(set(truck.packages))
+        ]
+
+        # There should exist only one truck with all packages
+        assert len(trucks_with_all_packages) == 1, "Packages 13, 15, 19 must all be on the same truck"

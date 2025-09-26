@@ -12,10 +12,10 @@ def init_system(data_dir="data"):
     load_package_data(os.path.join(data_dir, "packages.csv"), package_hash_table)
 
     # Create truck objects
-    truck1 = Truck(16, 18, None, [1, 13, 14, 15, 16, 20, 27, 29, 30, 31, 34, 40], 0.0, "4001 South 700 East",
+    truck1 = Truck(16, 18, None, [1, 13, 14, 15, 19, 16, 20, 27, 29, 30, 31, 34, 40], 0.0, "4001 South 700 East",
                    datetime.timedelta(hours=8))
 
-    truck2 = Truck(16, 18, None, [2, 3, 12, 17, 18, 19, 21, 22, 23, 24, 26, 37, 35, 36, 38, 39], 0.0,
+    truck2 = Truck(16, 18, None, [2, 3, 12, 17, 18, 21, 22, 23, 24, 26, 37, 35, 36, 38, 39], 0.0,
                    "4001 South 700 East", datetime.timedelta(hours=8))
 
     truck3 = Truck(16, 18, None, [9, 4, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33], 0.0, "4001 South 700 East",
