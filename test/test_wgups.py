@@ -38,9 +38,6 @@ class TestWGUPSConstraints:
 
     def test_packages_must_be_on_truck2(self, wgups_system):
         """Test that packages 2, 17, 35, 37 are on truck 2"""
-        package_hash_table, truck1, truck2, truck3 = wgups_system
-        truck2_packages = set(truck2.packages)
-        assert 2 in truck2_packages, "Package 2 must be on truck 2"
-        assert 17 in truck2_packages, "Package 17 must be on truck 2"
-        assert 35 in truck2_packages, "Package 35 must be on truck 2"
-        assert 37 in truck2_packages, "Package 37 must be on truck 2"
+        _, _, truck2, _ = wgups_system
+        expected_packages = {2, 17, 35, 37}
+        assert expected_packages.issubset(set(truck2.packages))
