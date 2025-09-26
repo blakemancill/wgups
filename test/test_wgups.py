@@ -3,7 +3,7 @@ import datetime
 import sys, os
 import csv
 
-from main import nearest_neighbor, init_system
+from main import nearest_neighbor, init_system, deliver_all_trucks
 from common.package_utils import update_package_9_address
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -29,12 +29,7 @@ class TestWGUPSConstraints:
         """Fixture to initialize and simulate deliveries for all trucks"""
         package_hash_table, trucks, csv_address, csv_distance = self.load_system()
 
-        nearest_neighbor(trucks[0], package_hash_table, csv_address, csv_distance)
-        nearest_neighbor(trucks[1], package_hash_table, csv_address, csv_distance)
-
-        trucks[2].depart_time = max(datetime.timedelta(hours=9, minutes=5),
-                                    min(trucks[0].time, trucks[1].time))
-        nearest_neighbor(trucks[2], package_hash_table, csv_address, csv_distance)
+        deliver_all_trucks(trucks, package_hash_table, csv_address, csv_distance)
 
         return package_hash_table, trucks, csv_address, csv_distance
 

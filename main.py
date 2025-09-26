@@ -30,7 +30,20 @@ def main() -> None:
         csv_address = list(csv_address)
 
     package_hash_table, trucks = init_system()
+    deliver_all_trucks(trucks, package_hash_table, csv_address, csv_distance)
 
+    # User Interface
+    ui = UserInterface(package_hash_table, trucks)
+    ui.start()
+
+def deliver_all_trucks(
+        trucks: List[Truck],
+        package_hash_table: ChainingHashTable,
+        csv_address: List[List[str]],
+        csv_distance: List[List[str]]
+) -> None:
+    """Simulate deliveries for all trucks in the proper order."""
+    # Deliver trucks 1 and 2 first
     nearest_neighbor(trucks[0], package_hash_table, csv_address, csv_distance)
     nearest_neighbor(trucks[1], package_hash_table, csv_address, csv_distance)
 
@@ -40,10 +53,6 @@ def main() -> None:
         min(trucks[0].time, trucks[1].time)
     )
     nearest_neighbor(trucks[2], package_hash_table, csv_address, csv_distance)
-
-    # User Interface
-    ui = UserInterface(package_hash_table, trucks)
-    ui.start()
 
 def get_truck_definitions() -> List[Truck]:
     """
