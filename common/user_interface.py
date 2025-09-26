@@ -19,20 +19,44 @@ class UserInterface:
             print(Fore.RED + Style.BRIGHT + "❌ Entry invalid. Closing program.")
             exit()
 
-        user_time = input(Fore.BLUE + Style.BRIGHT + "Please enter a time to check status of package(s). Format: HH:MM:SS ")
+        while True:  # main loop
+            # Prompt for a valid time
+            while True:
+                user_time = input(
+                    Fore.BLUE + Style.BRIGHT + "Please enter a time to check status of package(s). Format: HH:MM:SS ")
+                try:
+                    h, m, s = user_time.split(":")
+                    convert_timedelta = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
+                    break
+                except ValueError:
+                    print(Fore.RED + Style.BRIGHT + "❌ Invalid time format. Please use HH:MM:SS. Try again.")
 
-        try:
-            h, m, s = user_time.split(":")
-            convert_timedelta = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
-        except ValueError:
-            print(Fore.RED + Style.BRIGHT + "❌ Invalid time format. Please use HH:MM:SS. Closing program.")
-            exit()
+            # Update package 9 if past 10:20
+            if convert_timedelta >= datetime.timedelta(hours=10, minutes=20):
+                update_package_9_address(self.package_hash_table)
 
-        # Update package 9 if past 10:20
-        if convert_timedelta >= datetime.timedelta(hours=10, minutes=20):
-            update_package_9_address(self.package_hash_table)
+            # Display menu, repeat until valid choice
+            while True:
+                choice = input(Fore.BLUE + Style.BRIGHT +
+                               "To view the status of an individual package type 'solo'. "
+                               "For all packages grouped by truck type 'trucks'. "
+                               "For all packages in one list type 'all'. "
+                               "To enter a new time, type 'time'. To quit, type 'quit': "
+                               )
 
-        self.display_package_options(convert_timedelta)
+                if choice == "solo":
+                    self.show_solo_package(convert_timedelta)
+                elif choice == "trucks":
+                    self.show_packages_by_truck(convert_timedelta)
+                elif choice == "all":
+                    self.show_all_packages(convert_timedelta)
+                elif choice == "time":
+                    break  # break menu loop → back to time input
+                elif choice == "quit":
+                    print(Fore.GREEN + "👋 Goodbye!")
+                    return
+                else:
+                    print(Fore.RED + Style.BRIGHT + "❌ Entry invalid. Please try again.")
 
     def display_package_options(self, convert_timedelta):
         choice = input(Fore.BLUE + Style.BRIGHT +
@@ -49,7 +73,6 @@ class UserInterface:
             self.show_all_packages(convert_timedelta)
         else:
             print(Fore.RED + Style.BRIGHT + "❌ Entry invalid. Closing program.")
-            exit()
 
     def show_solo_package(self, convert_timedelta):
         package_id = input(Fore.BLUE + Style.BRIGHT + "Enter the numeric package ID: ")
@@ -65,7 +88,6 @@ class UserInterface:
             print(f"Delivery Time: {package.delivery_time if package.delivery_time else '--'}\n")
         except Exception:
             print(Fore.RED + Style.BRIGHT + "❌ Entry invalid. Closing program.")
-            exit()
 
     def show_packages_by_truck(self, convert_timedelta):
         from main import get_truck_definitions  # Avoid circular import
@@ -77,10 +99,11 @@ class UserInterface:
             for pid in truck.packages:
                 package = self.package_hash_table.lookup(pid)
                 package.update_status(convert_timedelta)
-                # Choose icon for status
                 status_icon = "✅" if package.status == "Delivered" else "🚚" if package.status == "En route" else "🏠"
+                addr = truncate(package.address, 25)
                 print(
-                    f"{package.package_id:<5}{package.address:<25}{status_icon + ' ' + package.status:<15}{str(package.delivery_time) if package.delivery_time else '--':<10}")
+                    f"{package.package_id:<5}{addr:<25}{status_icon + ' ' + package.status:<15}{str(package.delivery_time) if package.delivery_time else '--':<10}"
+                )
 
     def show_all_packages(self, convert_timedelta):
         print(Fore.YELLOW + Style.BRIGHT + "\n📦 All Packages 📦")

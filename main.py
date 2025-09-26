@@ -3,8 +3,8 @@ import csv
 import datetime
 import os
 
-from common.ChainingHashTable import ChainingHashTable
-from common.UserInterface import UserInterface
+from common.chaining_hash_table import ChainingHashTable
+from common.user_interface import UserInterface
 from common.package import Package
 from common.truck import Truck
 from common.package_utils import check_all_deadlines, extract_address, distance_between
