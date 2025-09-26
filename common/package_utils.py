@@ -1,4 +1,5 @@
-import datetime
+from colorama import Fore, Style
+
 
 # Update package 9's address at 10:20am
 def update_package_9_address(package_hash_table):
@@ -26,7 +27,7 @@ def check_all_deadlines(package_hash_table):
         package = package_hash_table.lookup(package_id)
         if package.delivery_time > package.deadline_time:
             all_met = False
-            print(f"Package {package.package_id} missed its deadline! "
+            print(Fore.RED + Style.BRIGHT + f"❌ Package {package.package_id} missed its deadline! "
                   f"Delivered at {package.delivery_time}, Deadline: {package.deadline_time}")
     if all_met:
-        print("All package deadlines have been met.")
+        print(Fore.GREEN + Style.BRIGHT + "✅ All package deadlines have been met.")

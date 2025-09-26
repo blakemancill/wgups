@@ -37,8 +37,6 @@ def main():
         trucks[2].depart_time = datetime.timedelta(hours=9, minutes=5)
     nearest_neighbor(trucks[2], package_hash_table, csv_address, csv_distance)
 
-    check_all_deadlines(package_hash_table)
-
     # User Interface
     ui = UserInterface(package_hash_table, trucks)
     ui.start()
