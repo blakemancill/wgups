@@ -31,3 +31,7 @@ def check_all_deadlines(package_hash_table):
                   f"Delivered at {package.delivery_time}, Deadline: {package.deadline_time}")
     if all_met:
         print(Fore.GREEN + Style.BRIGHT + "✅ All package deadlines have been met.")
+
+def truncate(text, max_length):
+    """Truncate a string and add ellipsis if too long."""
+    return text if len(text) <= max_length else text[:max_length-3] + "..."

@@ -1,6 +1,6 @@
 import datetime
 
-from common.package_utils import update_package_9_address, check_all_deadlines
+from common.package_utils import update_package_9_address, check_all_deadlines, truncate
 from colorama import Fore, Back, Style, init
 init(autoreset=True)
 
@@ -92,5 +92,8 @@ class UserInterface:
             # Find truck
             truck_num = next((i + 1 for i, t in enumerate(self.trucks) if package_id in t.packages), "--")
             status_icon = "✅" if package.status == "Delivered" else "🚚" if package.status == "En route" else "🏠"
+            addr = truncate(package.address, 25)
             print(
-                f"{package.package_id:<5}{truck_num:<7}{package.address:<25}{status_icon + ' ' + package.status:<15}{str(package.delivery_time) if package.delivery_time else '--':<10}")
+                f"{package.package_id:<5}{truck_num:<7}{addr:<25}{status_icon + ' ' + package.status:<15}"
+                f"{str(package.delivery_time) if package.delivery_time else '--':<10}"
+            )
