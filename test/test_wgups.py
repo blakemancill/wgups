@@ -25,6 +25,20 @@ class TestWGUPSConstraints:
         package_hash_table, trucks = init_system(data_dir)
         return package_hash_table, trucks, csv_address, csv_distance
 
+    @staticmethod
+    def deliver_trucks_1_and_2_then_3(package_hash_table, trucks, csv_address, csv_distance):
+        truck1, truck2, truck3 = trucks
+
+        # Deliver trucks 1 and 2 first
+        nearest_neighbor(truck1, package_hash_table, csv_address, csv_distance)
+        nearest_neighbor(truck2, package_hash_table, csv_address, csv_distance)
+
+        # Truck 3 departs at 9:05
+        truck3.depart_time = datetime.timedelta(hours=9, minutes=5)
+        nearest_neighbor(truck3, package_hash_table, csv_address, csv_distance)
+
+        return trucks
+
     @pytest.fixture
     def wgups_system(self):
         """Fixture to initialize and simulate deliveries for all trucks"""
@@ -43,15 +57,7 @@ class TestWGUPSConstraints:
 
     def test_package_9_address_update_and_timing(self):
         package_hash_table, trucks, csv_address, csv_distance = self.load_system()
-        truck1, truck2, truck3 = trucks
-
-        # Deliver trucks 1 and 2 before 10:20am
-        nearest_neighbor(truck1, package_hash_table, csv_address, csv_distance)
-        nearest_neighbor(truck2, package_hash_table, csv_address, csv_distance)
-
-        # Truck 3 departs before 10:20am
-        truck3.depart_time = datetime.timedelta(hours=9, minutes=5)
-        nearest_neighbor(truck3, package_hash_table, csv_address, csv_distance)
+        self.deliver_trucks_1_and_2_then_3(package_hash_table, trucks, csv_address, csv_distance)
 
         package_9 = package_hash_table.lookup(9)
         # Before 10:20am, address should be original
@@ -103,15 +109,7 @@ class TestWGUPSConstraints:
     def test_package_9_delivery_time(self):
         """Tests that package 9 is delivered after 10:20 AM"""
         package_hash_table, trucks, csv_address, csv_distance = self.load_system()
-        truck1, truck2, truck3 = trucks
-
-        # Deliver trucks 1 and 2 first
-        nearest_neighbor(truck1, package_hash_table, csv_address, csv_distance)
-        nearest_neighbor(truck2, package_hash_table, csv_address, csv_distance)
-
-        # Truck 3 departs at 9:05
-        truck3.depart_time = datetime.timedelta(hours=9, minutes=5)
-        nearest_neighbor(truck3, package_hash_table, csv_address, csv_distance)
+        self.deliver_trucks_1_and_2_then_3(package_hash_table, trucks, csv_address, csv_distance)
 
         # Update address at 10:20
         update_package_9_address(package_hash_table)
