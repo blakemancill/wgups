@@ -90,14 +90,9 @@ class UserInterface:
             print(Fore.YELLOW + Style.BRIGHT + f"\n📦 Truck {idx} Packages 📦")
             print(Fore.CYAN + f"{'ID':<5}{'Address':<25}{'Status':<15}{'Delivery':<10}")
             print("-" * 60)
-            for pid in truck.packages:
-                package = self.package_hash_table.lookup(pid)
-                package.update_status(convert_timedelta)
-                status_icon = "✅" if package.status == "Delivered" else "🚚" if package.status == "En route" else "🏠"
-                addr = truncate(package.address, 25)
-                print(
-                    f"{package.package_id:<5}{addr:<25}{status_icon + ' ' + package.status:<15}{str(package.delivery_time) if package.delivery_time else '--':<10}"
-                )
+            package = self.package_hash_table.lookup(pid)
+            package.update_status(convert_timedelta)
+            print(package.short_str())
 
     def show_all_packages(self, convert_timedelta):
         print(Fore.YELLOW + Style.BRIGHT + "\n📦 All Packages 📦")
@@ -106,11 +101,5 @@ class UserInterface:
         for package_id in range(1, 41):
             package = self.package_hash_table.lookup(package_id)
             package.update_status(convert_timedelta)
-            # Find truck
             truck_num = next((i + 1 for i, t in enumerate(self.trucks) if package_id in t.packages), "--")
-            status_icon = "✅" if package.status == "Delivered" else "🚚" if package.status == "En route" else "🏠"
-            addr = truncate(package.address, 25)
-            print(
-                f"{package.package_id:<5}{truck_num:<7}{addr:<25}{status_icon + ' ' + package.status:<15}"
-                f"{str(package.delivery_time) if package.delivery_time else '--':<10}"
-            )
+            print(package.short_str(truck_num))
