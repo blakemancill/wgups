@@ -24,11 +24,9 @@ class Package:
         self.delivery_time = delivery_time
 
     def __str__(self):
-        output = []
-        output.append(f"Package ID: {self.package_id}")
-        output.append(f"Address: {self.address}, {self.city}, {self.zipcode}")
-        output.append(f"Deadline: {self.deadline_time}, Weight: {self.weight}")
-        output.append(f"Status: {self.status} (Departed: {self.departure_time})")
+        output = [f"Package ID: {self.package_id}", f"Address: {self.address}, {self.city}, {self.zipcode}",
+                  f"Deadline: {self.deadline_time}, Weight: {self.weight}",
+                  f"Status: {self.status} (Departed: {self.departure_time})"]
         if self.delivery_time:
             output.append(f"Delivery Time: {self.delivery_time}")
         return "\n".join(output)
