@@ -2,6 +2,7 @@
 import csv
 import datetime
 import os
+from typing import List, Tuple
 
 from common.chaining_hash_table import ChainingHashTable
 from common.user_interface import UserInterface
@@ -9,7 +10,7 @@ from common.package import Package
 from common.truck import Truck
 from common.package_utils import extract_address, distance_between
 
-def init_system(data_dir="data"):
+def init_system(data_dir: str = "data") -> Tuple[ChainingHashTable, List[Truck]]:
     package_hash_table = ChainingHashTable()
     load_package_data(os.path.join(data_dir, "packages.csv"), package_hash_table)
 
@@ -18,7 +19,7 @@ def init_system(data_dir="data"):
 
     return package_hash_table, trucks
 
-def main():
+def main() -> None:
     # Read the csv files and place them into a list
     with open("data/distances.csv") as csvfile:
         csv_distance = csv.reader(csvfile)
@@ -44,7 +45,7 @@ def main():
     ui = UserInterface(package_hash_table, trucks)
     ui.start()
 
-def get_truck_definitions():
+def get_truck_definitions() -> List[Truck]:
     """
     Returns initialized truck objects with assigned package IDs and departure times
     """
@@ -64,7 +65,10 @@ def get_truck_definitions():
     ]
 
 # Creates package objects from the csv data, and loads package objects into hash table
-def load_package_data(filename, package_hash_table):
+def load_package_data(filename: str, package_hash_table: ChainingHashTable):
+    """
+    Creates package objects from the CSV data, and loads package objects into hash table
+    """
     with open(filename) as package_info:
         package_data = csv.reader(package_info)
         for package in package_data:
@@ -78,36 +82,58 @@ def load_package_data(filename, package_hash_table):
             package_status = "At Hub"
 
             package = Package(
-                package_id, package_address, package_city, package_state,
-                package_zip_code, package_deadline_time, package_weight, package_status, None, None
+                package_id,
+                package_address,
+                package_city,
+                package_state,
+                package_zip_code,
+                package_deadline_time,
+                package_weight,
+                package_status,
+                None,
+                None
             )
 
             package_hash_table.insert(package_id, package)
 
-def nearest_neighbor(truck, package_hash_table, csv_address, csv_distance):
-    not_delivered = [package_hash_table.lookup(pid) for pid in truck.packages]
+def nearest_neighbor(
+        truck: Truck,
+        package_hash_table: ChainingHashTable,
+        csv_address: List[List[str]],
+        csv_distance: List[List[str]]
+):
+    not_delivered: List[Package] = [package_hash_table.lookup(pid) for pid in truck.packages]
+    not_delivered = [p for p in not_delivered if p is not None]
+
     truck.packages.clear()
     truck.time = truck.depart_time
 
     while not_delivered:
         current_address_index = extract_address(truck.address, csv_address)
+        if current_address_index is None:
+            raise ValueError(f"Truck address {truck.address} not found in CSV.")
 
         # Filter packages that are ready to deliver (truck waits if none)
-        ready_packages = [p for p in not_delivered if truck.time >= getattr(p, "available_time", datetime.timedelta(hours=8))]
+        ready_packages = [p for p in not_delivered if
+                          truck.time >= getattr(p, "available_time", datetime.timedelta(hours=8))]
         if not ready_packages:
             # Wait until the earliest package becomes available
             next_available_time = min(getattr(p, "available_time", datetime.timedelta(hours=8)) for p in not_delivered)
             truck.time = next_available_time
-
         else:
             # Sort by earliest deadline, then by shortest distance
-            ready_packages.sort(key=lambda p: (p.deadline_time, distance_between(current_address_index, extract_address(p.address, csv_address), csv_distance)))
+            ready_packages.sort(
+                key=lambda p: (
+                    p.deadline_time,
+                    distance_between(current_address_index, extract_address(p.address, csv_address), csv_distance)
+                )
+            )
             next_package = ready_packages[0]
 
         # Deliver the package
         next_address_dist = distance_between(current_address_index, extract_address(next_package.address, csv_address), csv_distance)
         truck.mileage += next_address_dist
-        truck.time += datetime.timedelta(hours=next_address_dist / 18)  # Truck speed 18 mph
+        truck.time += datetime.timedelta(hours=next_address_dist / truck.speed)  # Truck speed 18 mph
         next_package.delivery_time = truck.time
         next_package.departure_time = truck.depart_time
         truck.address = next_package.address
