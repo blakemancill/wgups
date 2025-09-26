@@ -58,15 +58,6 @@ def get_truck_definitions():
         trucks.append(truck)
     return trucks
 
-def display_packages_by_truck(package_hash_table, convert_timedelta):
-    trucks = get_truck_definitions()
-    for idx, truck in enumerate(trucks, start=1):
-        print(f"\nTruck {idx}:")
-        for package_id in truck.packages:
-            package = package_hash_table.lookup(package_id)
-            package.update_status(convert_timedelta)
-            print(str(package) + "\n")
-
 # Creates package objects from the csv data, and loads package objects into hash table
 def load_package_data(filename, package_hash_table):
     with open(filename) as package_info:
