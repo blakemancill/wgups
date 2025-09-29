@@ -118,6 +118,10 @@ def nearest_neighbor(
     truck.packages.clear()
     truck.time = truck.depart_time
 
+    package_9 = package_hash_table.lookup(9)
+    if package_9:
+        package_9.available_time = datetime.timedelta(hours=10, minutes=20)
+
     while not_delivered:
         current_address_index = extract_address(truck.address, csv_address)
         if current_address_index is None:
