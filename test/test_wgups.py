@@ -100,15 +100,22 @@ class TestWGUPSConstraints:
                 f"Delivered at {package.delivery_time}, Deadline: {package.deadline_time}"
             )
 
-    def test_packages_13_15_19_same_delivery_time(self, wgups_system):
-        package_hash_table, _, _, _ = wgups_system
-        p13 = package_hash_table.lookup(13)
-        p15 = package_hash_table.lookup(15)
-        p19 = package_hash_table.lookup(19)
+    def test_packages_13_14_15_19_20_on_same_truck(self, wgups_system):
+        """Test that packages 13, 14, 15, 19, and 20 are all assigned to the same truck."""
+        package_hash_table, trucks, _, _ = wgups_system
+        required_package_ids = {13, 14, 15, 19, 20}
 
-        assert p13.delivery_time == p15.delivery_time == p19.delivery_time, (
-            f"Packages 13, 15, and 19 must have identical delivery times. "
-            f"Got: 13={p13.delivery_time}, 15={p15.delivery_time}, 19={p19.delivery_time}"
+        # Find which truck(s) contain these packages
+        trucks_containing_group = []
+        for truck in trucks:
+            truck_package_set = set(truck.packages)
+            if required_package_ids.issubset(truck_package_set):
+                trucks_containing_group.append(truck)
+
+        # Exactly one truck must contain all of them
+        assert len(trucks_containing_group) == 1, (
+            f"Packages {required_package_ids} must all be on the same truck. "
+            f"Found on {len(trucks_containing_group)} trucks instead of 1."
         )
 
     def test_total_mileage_under_140(self, wgups_system):

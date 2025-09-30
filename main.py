@@ -118,6 +118,7 @@ def nearest_neighbor(
     truck.packages.clear()
     truck.time = truck.depart_time
 
+    # Set availability time for package 9
     package_9 = package_hash_table.lookup(9)
     if package_9:
         package_9.available_time = datetime.timedelta(hours=10, minutes=20)
