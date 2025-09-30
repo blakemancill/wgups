@@ -52,7 +52,7 @@ class TestWGUPSConstraints:
         package_hash_table, trucks, csv_address, csv_distance = wgups_system
         truck1, truck2, truck3 = trucks
 
-        expected_packages = {2, 17, 35, 37}
+        expected_packages = {3, 18, 36, 38}
         assert expected_packages.issubset(set(truck2.packages))
 
     def test_package_9_address_update_and_timing(self):

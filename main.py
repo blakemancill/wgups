@@ -65,11 +65,11 @@ def get_truck_definitions() -> List[Truck]:
             depart_time=datetime.timedelta(hours=8)
         ),
         Truck(
-            packages=[2, 12, 17, 18, 21, 22, 23, 24, 26, 37, 35, 36, 38, 39],
+            packages=[2, 3, 12, 17, 18, 21, 22, 23, 24, 26, 37, 35, 36, 38, 39],
             depart_time=datetime.timedelta(hours=8)
         ),
         Truck(
-            packages=[3, 4, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33, 9],
+            packages=[4, 5, 6, 7, 8, 10, 11, 25, 28, 32, 33, 9],
             depart_time=datetime.timedelta(hours=9, minutes=5)
         ),
     ]
