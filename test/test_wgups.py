@@ -100,10 +100,10 @@ class TestWGUPSConstraints:
                 f"Delivered at {package.delivery_time}, Deadline: {package.deadline_time}"
             )
 
-    def test_packages_13_14_15_19_20_on_same_truck(self, wgups_system):
+    def test_packages_13_14_15_16_19_20_on_same_truck(self, wgups_system):
         """Test that packages 13, 14, 15, 19, and 20 are all assigned to the same truck."""
         package_hash_table, trucks, _, _ = wgups_system
-        required_package_ids = {13, 14, 15, 19, 20}
+        required_package_ids = {13, 14, 15, 16, 19, 20}
 
         # Find which truck(s) contain these packages
         trucks_containing_group = []
