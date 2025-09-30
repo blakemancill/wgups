@@ -100,6 +100,17 @@ class TestWGUPSConstraints:
                 f"Delivered at {package.delivery_time}, Deadline: {package.deadline_time}"
             )
 
+    def test_packages_13_15_19_same_delivery_time(self, wgups_system):
+        package_hash_table, _, _, _ = wgups_system
+        p13 = package_hash_table.lookup(13)
+        p15 = package_hash_table.lookup(15)
+        p19 = package_hash_table.lookup(19)
+
+        assert p13.delivery_time == p15.delivery_time == p19.delivery_time, (
+            f"Packages 13, 15, and 19 must have identical delivery times. "
+            f"Got: 13={p13.delivery_time}, 15={p15.delivery_time}, 19={p19.delivery_time}"
+        )
+
     def test_total_mileage_under_140(self, wgups_system):
         _, trucks, _, _ = wgups_system
         truck1, truck2, truck3 = trucks
